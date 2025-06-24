@@ -1,32 +1,20 @@
 from flask import Flask, jsonify
-import subprocess
+from mdrm_script import run_mdrm_script
 
 app = Flask(__name__)
 
-@app.route('/run', methods=['GET', 'POST'])
+@app.route('/run', methods=['GET'])
 def run_script():
     try:
-        result = subprocess.run(
-            ['python', 'mdrm.py'],
-            check=True,
-            capture_output=True,
-            text=True
-        )
-
+        output_dir = run_mdrm_script()
         return jsonify({
             'status': 'MDRM update successful',
-            'output': result.stdout
+            'output_dir': output_dir
         }), 200
-
-    except subprocess.CalledProcessError as e:
-        return jsonify({
-            'status': 'Script failed',
-            'error': e.stderr
-        }), 500
 
     except Exception as e:
         return jsonify({
-            'status': 'Unknown error',
+            'status': 'Script failed',
             'error': str(e)
         }), 500
 
